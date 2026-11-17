@@ -1,0 +1,73 @@
+---
+title: "Proof-1"
+author: "Andrés David Noza Mico"
+date: "2026-11-17"
+output: html_document
+---
+
+## Breve acercamiento a los datos de SPY y BTC
+
+```{r}
+install.packages(c(
+  "quantmod",
+  "forecast",
+  "tseries",
+  "ggplot2",
+  "dplyr",
+  "waveslim"
+))
+```
+```{r}
+library(quantmod)
+
+getSymbols(
+  c("SPY", "BTC-USD"),
+  src = "yahoo",
+  from = "2014-01-01"
+)
+
+spy <- Ad(SPY)
+btc <- Ad(`BTC-USD`)
+
+prices <- na.omit(merge(spy, btc))
+
+colnames(prices) <- c("SPY", "BTC")
+
+
+```
+
+Mediante la serie de precios calculamos los rendimientos logarítmicos.
+```{r}
+returns <- na.omit(
+  diff(log(prices))
+)
+
+plot(returns$SPY,
+     main = "S&P 500 - Rendimientos",
+     col = "blue")
+
+plot(returns$BTC,
+     main = "Bitcoin - Rendimientos",
+     col = "red")
+```
+
+```{r}
+# Autocorrelación
+acf(returns$SPY)
+acf(returns$BTC)
+
+# Distribuciones
+hist(returns$SPY, breaks = 100)
+hist(returns$BTC, breaks = 100)
+
+# Transformada de Fourier
+fft_spy <- fft(as.numeric(returns$SPY))
+fft_btc <- fft(as.numeric(returns$BTC))
+
+# Periodogramas
+spectrum(returns$SPY)
+spectrum(returns$BTC)
+```
+
+
+Sin embargo, nada de esto es plausible ni conserva un fin riguroso, ya que no tratamos con sistemas LTI. Los mercados no son sistemas LTI. ¿Entonces, como abordamos la exploración? ¿Podemos acaso transformar un mercado en LTI?
